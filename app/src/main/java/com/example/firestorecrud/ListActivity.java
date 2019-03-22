@@ -79,6 +79,7 @@ public class ListActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
+                        modelList.clear();
                         pd.dismiss();
                         for(DocumentSnapshot doc : task.getResult())
                         {
@@ -102,6 +103,35 @@ public class ListActivity extends AppCompatActivity {
 
                         pd.dismiss();
                         Toast.makeText(ListActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+    public void deleteData(int index) {
+
+
+        pd.setTitle("Deleting data...");
+        pd.show();
+
+        db.collection("Documents").document(modelList.get(index).getId())
+                .delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        pd.dismiss();
+                        Toast.makeText(ListActivity.this,"Deleted...",Toast.LENGTH_LONG).show();
+                        showData();
+
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        pd.dismiss();
+                        Toast.makeText(ListActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
+
                     }
                 });
     }

@@ -34,12 +34,13 @@ public class MainActivity extends AppCompatActivity {
 
     //firestore instance
     FirebaseFirestore db;
+
+    String pId,pTitle,pDescription;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //ambiwakchaure.abw@gmail.com
 
         getSupportActionBar().setTitle("Add Data");
         initialiseViews();
@@ -49,17 +50,38 @@ public class MainActivity extends AppCompatActivity {
         //firestore
         db = FirebaseFirestore.getInstance();
 
+        //get intent data
+        getIntendData();
+
         //click button to upload data
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                //get input data
-                String title = titleEt.getText().toString();
-                String description = descriptionEt.getText().toString();
+                Bundle bundle = getIntent().getExtras();
 
-                //method for upload data
-                uploadData(title,description);
+                if(bundle != null)
+                {
+                    //updating
+                    //get input data
+                    String id = pId;
+                    String title = titleEt.getText().toString();
+                    String description = descriptionEt.getText().toString();
+
+                    //function call to update data
+                    updateData(id,title,description);
+                }
+                else
+                {
+                    //adding new
+                    //get input data
+                    String title = titleEt.getText().toString();
+                    String description = descriptionEt.getText().toString();
+
+                    //method for upload data
+                    uploadData(title,description);
+                }
+
 
             }
         });
@@ -72,6 +94,59 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void updateData(String id, String title, String description)
+    {
+        pd.setTitle("Updating data...");
+        pd.show();
+
+        db.collection("Documents").document(id)
+                .update("title",title,"description",description)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        pd.dismiss();
+                        Toast.makeText(MainActivity.this,"Updated...",Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        pd.dismiss();
+                        Toast.makeText(MainActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
+
+                    }
+                });
+    }
+
+    private void getIntendData() {
+
+        Bundle bundle = getIntent().getExtras();
+
+        if(bundle != null)
+        {
+            //update data
+            getSupportActionBar().setTitle("Update Data");
+            saveButton.setText("Update");
+
+            //get intent data
+            pId = bundle.getString("pId");
+            pTitle = bundle.getString("pTitle");
+            pDescription = bundle.getString("pDescription");
+
+            //set data
+            titleEt.setText(pTitle);
+            descriptionEt.setText(pDescription);
+        }
+        else
+        {
+            //add new data
+            getSupportActionBar().setTitle("Add Data");
+            saveButton.setText("Save");
+        }
     }
 
     private void uploadData(String title, String description) {
@@ -117,4 +192,6 @@ public class MainActivity extends AppCompatActivity {
         saveButton = (Button)findViewById(R.id.saveButton);
         showListButton = (Button)findViewById(R.id.showListButton);
     }
+
+
 }
